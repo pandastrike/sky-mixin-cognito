@@ -1,0 +1,7 @@
+{{#each tables}}
+MixinDynamoDBTable{{resourceTitle}}:
+  Type: "AWS::DynamoDB::Table"
+  DeletionPolicy: Retain
+  Properties:
+    {{indent 4 tableDescription}}
+{{/each}}
