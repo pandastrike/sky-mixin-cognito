@@ -11,7 +11,6 @@ getFilePath = (name) -> resolve __dirname, "..", "..", "..", "files", name
 
 mixin = do ->
   schema = yaml await read getFilePath "schema.yaml"
-  #schema.definitions = yaml await read getFilePath "definitions.yaml"
   template = await read getFilePath "template.yaml"
 
   new MIXIN {

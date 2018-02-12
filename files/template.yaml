@@ -1,7 +1,17 @@
-{{#each tables}}
-MixinDynamoDBTable{{resourceTitle}}:
-  Type: "AWS::DynamoDB::Table"
-  DeletionPolicy: Retain
-  Properties:
-    {{indent 4 tableDescription}}
+{{#each pools}}
+
+{{#if description}}
+{{indent 0 description}}
+{{/if}}
+
+{{#if ancillaryResources}}
+{{#each ancillaryResources}}
+{{indent 0 .}}
+{{/each}}
+{{/if}}
+
+{{#if authorizer}}
+{{indent 0 authorizer}}
+{{/if}}
+
 {{/each}}

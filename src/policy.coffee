@@ -1,25 +1,24 @@
 # Panda Sky Mixin: Cognito Lambda permission policy
-# This mixin grants the API Lambdas access to
+# This mixin grants the API Lambdas access to User Pools, allowing the developer to conduct user login/out.
 # That IAM Role permission is rolled into your CloudFormation stack after being generated here.
 
 import {collect, project} from "fairmont"
+import {namePool} from "./utils"
 
 Policy = (config, global) ->
-  # # Grant total access to the tables listed in this mixin.
-  # # TODO: Consider limiting the actions on those tables and/or how to specify limitations within the mixin configuration.
-  #
-  # {region} = global.aws
-  # names = collect project "name", config.tables
-  # resources = []
-  # for n in names
-  #   resources.push "arn:aws:dynamodb:#{region}:*:table/#{n}"
-  #   resources.push "arn:aws:dynamodb:#{region}:*:table/#{n}/*"
-  #
-  # [
-  #   Effect: "Allow"
-  #   Action: [ "dynamodb:*" ]
-  #   Resource: resources
-  # ]
-  []
+  # Grant total access to the user pools listed in this mixin.
+  # TODO: Consider limiting the actions on those pools and/or how to specify limitations within the mixin configuration.
+
+  {region} = global.aws
+  names = collect project "name", config.pools
+  resources = []
+  for n in names
+    resources.push "Fn::GetAtt": [namePool name, "Arn"]
+
+  [
+    Effect: "Allow"
+    Action: [ "cognito-idp:*" ]
+    Resource: resources
+  ]
 
 export default Policy

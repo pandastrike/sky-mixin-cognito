@@ -1,6 +1,28 @@
 type: object
 additionalProperties: false
 properties:
+  pools:
+    description: >
+      This describes a collection of Cognito resources that should be incorporated into this Sky API deployment.  This includes a User Pool, a client that is authorized to interface with it, and Gateway Authorizer to provide authorization in the Gateway Request (Step 1) of Gateway cycle. Sky retains the User Pool and client upon stack delete.
+    type: object
+    additionalProperties: false
+    required: [name, type]
+    properties:
+      name:
+        description: >
+          The name of the User Pool.  This name is used with the associated Cognito resources.
+        type: string
+        minLength: 1
+      type:
+        description: >
+          The named preset for the User Pool.  A given pool's internal coniguration is complex, but these presets specify combinations designed to facilitate a use-case goal.
+        type: string
+        enum: [ frictionless ]
+      resources:
+        description: >
+          A list of the resources in this environment protected by this User Pool.  You may either speciy a resource to require authorization on all of its methods, or use the notation 'resource.method'
+        type: array
+        items: string
 
   tags:
     description: >
