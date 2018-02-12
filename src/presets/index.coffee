@@ -10,7 +10,7 @@ MultiExpander = (pools, tags) ->
   else
     Expander p, tags for p in pools
 
-Expander = (pool) ->
+Expander = (pool, tags) ->
   {name, type, resources} = pool
 
   switch type

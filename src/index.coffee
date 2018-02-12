@@ -5,12 +5,13 @@ import {yaml} from "panda-serialize"
 
 import getPolicyStatements from "./policy"
 import preprocess from "./preprocessor"
-import cli from "./cli"
+#import cli from "./cli"
 
 getFilePath = (name) -> resolve __dirname, "..", "..", "..", "files", name
 
 mixin = do ->
   schema = yaml await read getFilePath "schema.yaml"
+  schema.definitions = yaml await read getFilePath "definitions.yaml"
   template = await read getFilePath "template.yaml"
 
   new MIXIN {
@@ -18,7 +19,7 @@ mixin = do ->
     schema
     template
     preprocess
-    cli
+    #cli
     getPolicyStatements
   }
 

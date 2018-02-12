@@ -1,10 +1,8 @@
-import {capitalize, camelCase, plainText} from "faimront"
+import {capitalize, camelCase, plainText} from "fairmont"
 
-Utils = ->
-  formatCF = (name) -> capitalize camelCase plainText name
-  namePool = (name) -> "MixinUserPool#{formatCF name}"
+formatCF = (name) -> capitalize camelCase plainText name
+namePool = (name) -> "MixinUserPool#{formatCF name}"
 
-export default Utils
 export {
   formatCF
   namePool

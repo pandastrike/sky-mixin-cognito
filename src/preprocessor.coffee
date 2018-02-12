@@ -9,6 +9,8 @@ import warningMsg from "./warning-messages"
 import expandPresets from "./presets"
 
 process = (_AWS_, config) ->
+  {AWS:{Cognito:{poolGet}}} = await Sundog _AWS_
+
   exists = (name) ->
     try
       await poolGet name
@@ -27,15 +29,16 @@ process = (_AWS_, config) ->
   pools = expandPresets pools, tags
 
   # Scan for user pools that already exist.
+  output = []
   for p in pools
     if await exists p.name
       # Here, we only need the Gateway Authorizer resource.
-      needed.push p.authorizer
+      output.push p.authorizer
     else
       # Here, we need the whole Cognito resource stack.
-      needed.push p
+      output.push p
 
-  {pools: needed}
+  {pools: output}
 
 
 export default process

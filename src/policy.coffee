@@ -13,7 +13,7 @@ Policy = (config, global) ->
   names = collect project "name", config.pools
   resources = []
   for n in names
-    resources.push "Fn::GetAtt": [namePool name, "Arn"]
+    resources.push JSON.stringify "Fn::GetAtt": [namePool(n), "Arn"]
 
   [
     Effect: "Allow"

@@ -1,6 +1,7 @@
 # Panda Sky Cognito Mixin - Preset "Frictionless"
 # This preset is meant to assemble the configuration needed to allow a developer to build authentication / authorization into their API that relies entirely on the secret key stored within the end-user's device.  This facilitates a fast, non-manual login experience, after the device is added during.
 
+import YAML from "js-yaml"
 import {formatCF, namePool} from "../utils"
 
 FrictionlessConfig = (name, tags) ->
@@ -9,7 +10,7 @@ FrictionlessConfig = (name, tags) ->
   snsTopic = "CognitoPool#{formattedName}Caller"
 
   name: name
-  description:
+  description: YAML.safeDump
     "#{poolName}":
       Type: "AWS::Cognito::UserPool"
       DeletionPolicy: "Retain"
@@ -40,41 +41,45 @@ FrictionlessConfig = (name, tags) ->
              Ref: "#{formattedName}SNSTopic"
         UserPoolTags: tags
 
-  ancillaryResources:
-    "MixinPool#{formattedName}SNSTopic":
-      Type: "AWS::SNS::Topic"
-      DeletionPolicy: "Retain"
-      Properties:
-        DisplayName: snsTopic
-        TopicName: snsTopic
+  ancillaryResources: [
+    YAML.safeDump
+      "MixinPool#{formattedName}SNSTopic":
+        Type: "AWS::SNS::Topic"
+        DeletionPolicy: "Retain"
+        Properties:
+          DisplayName: snsTopic
+          TopicName: snsTopic
 
-    "MixinPool#{formattedName}SNSAccess":
-      Type: "AWS::IAM::Role"
-      DeletionPolicy: "Retain"
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement: [{
-            Effect: "Allow"
-            Principal:
-              Service: ["cognito-idp.amazonaws.com"]
-            Action: ["sts:AssumeRole"]
-          }]
-        Policies: [{
-          PolicyName: "#{formattedName}SNSAccess"
-          PolicyDocument:
+    YAML.safeDump
+      "MixinPool#{formattedName}SNSAccess":
+        Type: "AWS::IAM::Role"
+        DeletionPolicy: "Retain"
+        Properties:
+          AssumeRolePolicyDocument:
             Version: "2012-10-17"
             Statement: [{
               Effect: "Allow"
-              Action: ["sns:*"]
-              Resource: [
-                "arn:aws:sns:*:*:#{snsTopic}"
-                "arn:aws:sns:*:*:#{snsTopic}:*"
-              ]
+              Principal:
+                Service: ["cognito-idp.amazonaws.com"]
+              Action: ["sts:AssumeRole"]
             }]
-        }]
+          Policies: [{
+            PolicyName: "#{formattedName}SNSAccess"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement: [{
+                Effect: "Allow"
+                Action: ["sns:*"]
+                Resource: [
+                  "arn:aws:sns:*:*:#{snsTopic}"
+                  "arn:aws:sns:*:*:#{snsTopic}:*"
+                ]
+              }]
+          }]
+  ]
 
-  authorizer:
+
+  authorizer: YAML.safeDump
     "MixinPool#{formattedName}Authorizer":
       Type: "AWS::ApiGateway::Authorizer"
       Properties:

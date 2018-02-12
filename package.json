@@ -48,6 +48,7 @@
     "panda-interview": "0.0.1",
     "panda-serialize": "^0.2.0",
     "panda-sky-mixin": "0.0.3",
-    "sundog": "file:../sundog"
+    "sundog": "file:../sundog",
+    "js-yaml": "^3.10.0"
   }
 }

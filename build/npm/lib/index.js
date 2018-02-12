@@ -22,16 +22,13 @@ var _preprocessor = require("./preprocessor");
 
 var _preprocessor2 = _interopRequireDefault(_preprocessor);
 
-var _cli = require("./cli");
-
-var _cli2 = _interopRequireDefault(_cli);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var getFilePath, mixin;
 
+//import cli from "./cli"
 getFilePath = function (name) {
   return (0, _path.resolve)(__dirname, "..", "..", "..", "files", name);
 };
@@ -39,14 +36,14 @@ getFilePath = function (name) {
 mixin = _asyncToGenerator(function* () {
   var schema, template;
   schema = (0, _pandaSerialize.yaml)((yield (0, _fairmont.read)(getFilePath("schema.yaml"))));
-  //schema.definitions = yaml await read getFilePath "definitions.yaml"
+  schema.definitions = (0, _pandaSerialize.yaml)((yield (0, _fairmont.read)(getFilePath("definitions.yaml"))));
   template = yield (0, _fairmont.read)(getFilePath("template.yaml"));
   return new _pandaSkyMixin2.default({
     name: "cognito",
     schema,
     template,
     preprocess: _preprocessor2.default,
-    cli: _cli2.default,
+    //cli
     getPolicyStatements: _policy2.default
   });
 })();
