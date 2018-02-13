@@ -4,17 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _sundog = require("sundog");
-
-var _sundog2 = _interopRequireDefault(_sundog);
-
-var _pandaSerialize = require("panda-serialize");
-
 var _fairmont = require("fairmont");
 
-var _warningMessages = require("./warning-messages");
-
-var _warningMessages2 = _interopRequireDefault(_warningMessages);
+var _utils = require("./utils");
 
 var _presets = require("./presets");
 
@@ -29,29 +21,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var process;
 
 process = (() => {
-  var _ref = _asyncToGenerator(function* (_AWS_, config) {
-    var c, env, exists, i, len, output, p, poolGet, pools, tags;
-    ({
-      AWS: {
-        Cognito: { poolGet }
-      }
-    } = yield (0, _sundog2.default)(_AWS_));
-    exists = (() => {
-      var _ref2 = _asyncToGenerator(function* (name) {
-        var e;
-        try {
-          return yield poolGet(name);
-        } catch (error) {
-          e = error;
-          (0, _warningMessages2.default)(e);
-          throw e;
-        }
-      });
-
-      return function exists(_x3) {
-        return _ref2.apply(this, arguments);
-      };
-    })();
+  var _ref = _asyncToGenerator(function* (SDK, config) {
+    var c, deployment, env, exists, i, len, output, p, pools, tags;
+    exists = yield (0, _utils._exists)(SDK);
     // Start by extracting out the Cognito Mixin configuration:
     ({ env, tags = [] } = config);
     c = config.aws.environments[env].mixins.cognito;
@@ -59,18 +31,12 @@ process = (() => {
     c.tags = (0, _fairmont.cat)(c.tags || [], tags);
     // Expand the preset name to the full configuraiton template.
     ({ pools = [], tags } = c);
-    pools = (0, _presets2.default)(pools, tags);
-    // Scan for user pools that already exist.
     output = [];
     for (i = 0, len = pools.length; i < len; i++) {
       p = pools[i];
-      if (yield exists(p.name)) {
-        // Here, we only need the Gateway Authorizer resource.
-        output.push(p.authorizer);
-      } else {
-        // Here, we need the whole Cognito resource stack.
-        output.push(p);
-      }
+      // Don't ask for resources that already exist.
+      deployment = yield exists(p.name);
+      output.push((0, _presets2.default)(p, tags, deployment));
     }
     return {
       pools: output

@@ -4,20 +4,13 @@
 import {empty} from "fairmont"
 import frictionless from "./frictionless"
 
-MultiExpander = (pools, tags) ->
-  if !pools || empty pools
-    []
-  else
-    Expander p, tags for p in pools
-
-Expander = (pool, tags) ->
-  {name, type, resources} = pool
-
+Expand = (pool, tags, deployment) ->
+  {name, type} = pool
   switch type
     when "frictionless"
-      frictionless name, tags
+      frictionless name, tags, deployment
     else
       throw new Error "Unknown type preset #{type}. Unable to continue."
 
 
-export default MultiExpander
+export default Expand
