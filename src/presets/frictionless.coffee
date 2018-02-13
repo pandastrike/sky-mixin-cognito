@@ -2,7 +2,7 @@
 # This preset is meant to assemble the configuration needed to allow a developer to build authentication / authorization into their API that relies entirely on the secret key stored within the end-user's device.  This facilitates a fast, non-manual login experience, after the device is added during.
 
 import YAML from "js-yaml"
-import {formatCF, namePool} from "../utils"
+import {formatCF, namePool, extractTags} from "../utils"
 
 FrictionlessConfig = (name, tags) ->
   formattedName = formatCF name
@@ -13,6 +13,7 @@ FrictionlessConfig = (name, tags) ->
   description: YAML.safeDump
     "#{poolName}":
       Type: "AWS::Cognito::UserPool"
+      DependsOn: ["MixinPool#{formattedName}SNSRole"]
       DeletionPolicy: "Retain"
       Properties:
         UserPoolName: name
@@ -25,33 +26,26 @@ FrictionlessConfig = (name, tags) ->
         MfaConfiguration: "ON"
         Schema: [{
           Name: "email"
-          AttributeDataType: "string"
+          AttributeDataType: "String"
           DeveloperOnlyAttribute: false
           Mutable: true
           Required: true
           },{
           Name: "phone_number"
-          AttributeDataType: "string"
+          AttributeDataType: "String"
           DeveloperOnlyAttribute: false
           Mutable: true
           Required: true
         }]
         SmsConfiguration:
-           SnsCallerArn:
-             Ref: "#{formattedName}SNSTopic"
-        UserPoolTags: tags
+          ExternalId: "#{formattedName}-external-id"
+          SnsCallerArn:
+            "Fn::GetAtt": ["MixinPool#{formattedName}SNSRole", "Arn"]
+        UserPoolTags: extractTags tags
 
   ancillaryResources: [
     YAML.safeDump
-      "MixinPool#{formattedName}SNSTopic":
-        Type: "AWS::SNS::Topic"
-        DeletionPolicy: "Retain"
-        Properties:
-          DisplayName: snsTopic
-          TopicName: snsTopic
-
-    YAML.safeDump
-      "MixinPool#{formattedName}SNSAccess":
+      "MixinPool#{formattedName}SNSRole":
         Type: "AWS::IAM::Role"
         DeletionPolicy: "Retain"
         Properties:
@@ -70,10 +64,7 @@ FrictionlessConfig = (name, tags) ->
               Statement: [{
                 Effect: "Allow"
                 Action: ["sns:*"]
-                Resource: [
-                  "arn:aws:sns:*:*:#{snsTopic}"
-                  "arn:aws:sns:*:*:#{snsTopic}:*"
-                ]
+                Resource: "*"
               }]
           }]
   ]
@@ -82,11 +73,12 @@ FrictionlessConfig = (name, tags) ->
   authorizer: YAML.safeDump
     "MixinPool#{formattedName}Authorizer":
       Type: "AWS::ApiGateway::Authorizer"
+      DependsOn: [poolName, "API"]
       Properties:
         Type: "COGNITO_USER_POOLS"
         IdentitySource: "method.request.header.Authorization"
         Name: name
-        ProviderARNs: [{Ref: poolName}]
+        ProviderARNs: ["Fn::GetAtt": [poolName, "Arn"]]
         RestApiId: {Ref: "API"}
 
 

@@ -26,6 +26,7 @@ FrictionlessConfig = function (name, tags) {
     description: _jsYaml2.default.safeDump({
       [`${poolName}`]: {
         Type: "AWS::Cognito::UserPool",
+        DependsOn: [`MixinPool${formattedName}SNSRole`],
         DeletionPolicy: "Retain",
         Properties: {
           UserPoolName: name,
@@ -40,37 +41,29 @@ FrictionlessConfig = function (name, tags) {
           MfaConfiguration: "ON",
           Schema: [{
             Name: "email",
-            AttributeDataType: "string",
+            AttributeDataType: "String",
             DeveloperOnlyAttribute: false,
             Mutable: true,
             Required: true
           }, {
             Name: "phone_number",
-            AttributeDataType: "string",
+            AttributeDataType: "String",
             DeveloperOnlyAttribute: false,
             Mutable: true,
             Required: true
           }],
           SmsConfiguration: {
+            ExternalId: `${formattedName}-external-id`,
             SnsCallerArn: {
-              Ref: `${formattedName}SNSTopic`
+              "Fn::GetAtt": [`MixinPool${formattedName}SNSRole`, "Arn"]
             }
           },
-          UserPoolTags: tags
+          UserPoolTags: (0, _utils.extractTags)(tags)
         }
       }
     }),
     ancillaryResources: [_jsYaml2.default.safeDump({
-      [`MixinPool${formattedName}SNSTopic`]: {
-        Type: "AWS::SNS::Topic",
-        DeletionPolicy: "Retain",
-        Properties: {
-          DisplayName: snsTopic,
-          TopicName: snsTopic
-        }
-      }
-    }), _jsYaml2.default.safeDump({
-      [`MixinPool${formattedName}SNSAccess`]: {
+      [`MixinPool${formattedName}SNSRole`]: {
         Type: "AWS::IAM::Role",
         DeletionPolicy: "Retain",
         Properties: {
@@ -91,7 +84,7 @@ FrictionlessConfig = function (name, tags) {
               Statement: [{
                 Effect: "Allow",
                 Action: ["sns:*"],
-                Resource: [`arn:aws:sns:*:*:${snsTopic}`, `arn:aws:sns:*:*:${snsTopic}:*`]
+                Resource: "*"
               }]
             }
           }]
@@ -101,12 +94,13 @@ FrictionlessConfig = function (name, tags) {
     authorizer: _jsYaml2.default.safeDump({
       [`MixinPool${formattedName}Authorizer`]: {
         Type: "AWS::ApiGateway::Authorizer",
+        DependsOn: [poolName, "API"],
         Properties: {
           Type: "COGNITO_USER_POOLS",
           IdentitySource: "method.request.header.Authorization",
           Name: name,
           ProviderARNs: [{
-            Ref: poolName
+            "Fn::GetAtt": [poolName, "Arn"]
           }],
           RestApiId: {
             Ref: "API"
