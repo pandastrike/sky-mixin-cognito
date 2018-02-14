@@ -1,4 +1,4 @@
-import {capitalize, camelCase, plainText} from "fairmont"
+import {capitalize, camelCase, plainText, memoize} from "fairmont"
 import Sundog from "sundog"
 
 import warningMsg from "./warning-messages"
@@ -23,10 +23,10 @@ _addPoolARN = ({whoAmI}, region) ->
       false
 
 # Does the user pool exist?  Return it with its ARN if it does or return false.
-_exists = (SDK) ->
+_exists = memoize (SDK) ->
   {AWS:{Cognito:{poolGet}, STS}} = await Sundog SDK
   addPoolARN = await _addPoolARN STS, SDK.config.region
-  (name) ->
+  memoize (name) ->
     try
       addPoolARN await poolGet name
     catch e

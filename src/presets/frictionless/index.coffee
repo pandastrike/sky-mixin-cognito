@@ -5,13 +5,17 @@ import YAML from "js-yaml"
 
 import buildPool from "./pool"
 import buildSNSRole from "./sns-role"
+import buildClient from "./client"
 import buildAuthorizer from "./authorizer"
 
 FrictionlessConfig = (name, tags, deployment) ->
   output = {name}
   if !deployment
     output.description = YAML.safeDump buildPool name, tags
-    output.ancillaryResources = [ YAML.safeDump buildSNSRole name ]
+    output.ancillaryResources = [
+      YAML.safeDump buildSNSRole name
+      YAML.safeDump buildClient name
+    ]
     output.authorizer = YAML.safeDump buildAuthorizer name
   else
     output.authorizer = YAML.safeDump buildAuthorizer name, deployment.ARN

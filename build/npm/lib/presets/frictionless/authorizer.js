@@ -17,7 +17,7 @@ buildAuthorizer = function (name, poolARN) {
   } else {
     dependencies.push((0, _utils.namePool)(name));
     providers = [{
-      "Fn::GetAtt": [(0, _utils.namePool)(name, "Arn")]
+      "Fn::GetAtt": [(0, _utils.namePool)(name), "Arn"]
     }];
   }
   return {

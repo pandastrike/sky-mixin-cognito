@@ -16,6 +16,10 @@ var _snsRole = require("./sns-role");
 
 var _snsRole2 = _interopRequireDefault(_snsRole);
 
+var _client = require("./client");
+
+var _client2 = _interopRequireDefault(_client);
+
 var _authorizer = require("./authorizer");
 
 var _authorizer2 = _interopRequireDefault(_authorizer);
@@ -31,7 +35,7 @@ FrictionlessConfig = function (name, tags, deployment) {
   output = { name };
   if (!deployment) {
     output.description = _jsYaml2.default.safeDump((0, _pool2.default)(name, tags));
-    output.ancillaryResources = [_jsYaml2.default.safeDump((0, _snsRole2.default)(name))];
+    output.ancillaryResources = [_jsYaml2.default.safeDump((0, _snsRole2.default)(name)), _jsYaml2.default.safeDump((0, _client2.default)(name))];
     output.authorizer = _jsYaml2.default.safeDump((0, _authorizer2.default)(name));
   } else {
     output.authorizer = _jsYaml2.default.safeDump((0, _authorizer2.default)(name, deployment.ARN));

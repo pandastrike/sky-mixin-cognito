@@ -61,7 +61,7 @@ _addPoolARN = (() => {
 })();
 
 // Does the user pool exist?  Return it with its ARN if it does or return false.
-exports._exists = _exists = (() => {
+exports._exists = _exists = (0, _fairmont.memoize)((() => {
   var _ref2 = _asyncToGenerator(function* (SDK) {
     var STS, addPoolARN, poolGet;
     ({
@@ -71,7 +71,7 @@ exports._exists = _exists = (() => {
       }
     } = yield (0, _sundog2.default)(SDK));
     addPoolARN = yield _addPoolARN(STS, SDK.config.region);
-    return (() => {
+    return (0, _fairmont.memoize)((() => {
       var _ref3 = _asyncToGenerator(function* (name) {
         var e;
         try {
@@ -86,13 +86,13 @@ exports._exists = _exists = (() => {
       return function (_x4) {
         return _ref3.apply(this, arguments);
       };
-    })();
+    })());
   });
 
-  return function _exists(_x3) {
+  return function (_x3) {
     return _ref2.apply(this, arguments);
   };
-})();
+})());
 
 exports._exists = _exists;
 exports.extractTags = extractTags;

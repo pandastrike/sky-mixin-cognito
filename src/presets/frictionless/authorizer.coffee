@@ -7,7 +7,7 @@ buildAuthorizer = (name, poolARN) ->
     providers = [ poolARN ]
   else
     dependencies.push namePool name
-    providers = [ "Fn::GetAtt": [namePool name, "Arn"] ]
+    providers = [ "Fn::GetAtt": [namePool(name), "Arn"] ]
 
   "MixinPool#{formatCF name}Authorizer":
     Type: "AWS::ApiGateway::Authorizer"
