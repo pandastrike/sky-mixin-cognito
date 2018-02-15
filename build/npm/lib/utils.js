@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.namePool = exports.formatCF = exports.extractTags = exports._exists = undefined;
+exports.nameClient = exports.namePool = exports.formatCF = exports.extractTags = exports._exists = undefined;
 
 var _fairmont = require("fairmont");
 
@@ -19,7 +19,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-var _addPoolARN, _exists, extractTags, formatCF, namePool;
+var _addClientID, _addPoolARN, _exists, extractTags, formatCF, nameClient, namePool;
 
 // Sky accepts tags as an array, but Cognito's CloudFormation template wants them as dictionary.
 exports.extractTags = extractTags = function (tags = []) {
@@ -38,6 +38,10 @@ exports.formatCF = formatCF = function (name) {
 
 exports.namePool = namePool = function (name) {
   return `MixinUserPool${formatCF(name)}`;
+};
+
+exports.nameClient = nameClient = function (name) {
+  return `MixinPool${formatCF(name)}Client`;
 };
 
 // The user pool ARN is not part of the pool data structure.  Add if possible.
@@ -60,22 +64,44 @@ _addPoolARN = (() => {
   };
 })();
 
+_addClientID = function ({ clientGetHead }) {
+  return function (pool) {
+    if (pool) {
+      return Object.defineProperties(pool, {
+        clientID: {
+          enumerable: true,
+          get: (() => {
+            var _ref2 = _asyncToGenerator(function* () {
+              return (yield clientGetHead(pool.Id, pool.Name)).ClientId;
+            });
+
+            return function get() {
+              return _ref2.apply(this, arguments);
+            };
+          })()
+        }
+      });
+    } else {
+      return false;
+    }
+  };
+};
+
 // Does the user pool exist?  Return it with its ARN if it does or return false.
 exports._exists = _exists = (0, _fairmont.memoize)((() => {
-  var _ref2 = _asyncToGenerator(function* (SDK) {
-    var STS, addPoolARN, poolGet;
+  var _ref3 = _asyncToGenerator(function* (SDK) {
+    var Cognito, STS, addClientID, addPoolARN, poolGetHead;
     ({
-      AWS: {
-        Cognito: { poolGet },
-        STS
-      }
+      AWS: { Cognito, STS }
     } = yield (0, _sundog2.default)(SDK));
     addPoolARN = yield _addPoolARN(STS, SDK.config.region);
+    addClientID = _addClientID(Cognito);
+    ({ poolGetHead } = Cognito);
     return (0, _fairmont.memoize)((() => {
-      var _ref3 = _asyncToGenerator(function* (name) {
+      var _ref4 = _asyncToGenerator(function* (name) {
         var e;
         try {
-          return addPoolARN((yield poolGet(name)));
+          return yield addClientID(addPoolARN((yield poolGetHead(name))));
         } catch (error) {
           e = error;
           (0, _warningMessages2.default)(e);
@@ -84,13 +110,13 @@ exports._exists = _exists = (0, _fairmont.memoize)((() => {
       });
 
       return function (_x4) {
-        return _ref3.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       };
     })());
   });
 
   return function (_x3) {
-    return _ref2.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 })());
 
@@ -98,3 +124,4 @@ exports._exists = _exists;
 exports.extractTags = extractTags;
 exports.formatCF = formatCF;
 exports.namePool = namePool;
+exports.nameClient = nameClient;

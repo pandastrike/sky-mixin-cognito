@@ -15,9 +15,3 @@ pool:
         The named preset for the User Pool.  A given pool's internal coniguration is complex, but these presets specify combinations designed to facilitate a use-case goal.
       type: string
       enum: [ frictionless ]
-    resources:
-      description: >
-        A list of the resources in this environment protected by this User Pool.  You may either speciy a resource to require authorization on all of its methods, or use the notation 'resource.method'
-      type: array
-      items:
-        type: string

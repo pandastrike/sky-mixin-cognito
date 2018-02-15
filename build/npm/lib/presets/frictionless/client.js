@@ -12,7 +12,7 @@ buildClient = function (name) {
   var formattedName;
   formattedName = (0, _utils.formatCF)(name);
   return {
-    [`MixinPool${formattedName}Client`]: {
+    [`${(0, _utils.nameClient)(name)}`]: {
       Type: "AWS::Cognito::UserPoolClient",
       DeletionPolicy: "Retain",
       Properties: {

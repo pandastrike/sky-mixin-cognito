@@ -1,9 +1,9 @@
-import {formatCF, namePool} from "../../utils"
+import {formatCF, namePool, nameClient} from "../../utils"
 
 buildClient = (name) ->
   formattedName = formatCF name
 
-  "MixinPool#{formattedName}Client":
+  "#{nameClient name}":
     Type: "AWS::Cognito::UserPoolClient"
     DeletionPolicy: "Retain"
     Properties:

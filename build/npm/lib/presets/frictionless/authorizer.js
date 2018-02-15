@@ -21,7 +21,8 @@ buildAuthorizer = function (name, poolARN) {
     }];
   }
   return {
-    [`MixinPool${(0, _utils.formatCF)(name)}Authorizer`]: {
+    // TODO: For now, if the API resource needs an authorizer, it will reference the resource APIAuthorizer, defined here.  This needs to be added to the mixin interface to dynamically add itself to a list of avaialable, named authorizers.
+    "MixinAPIAuthorizer": {
       Type: "AWS::ApiGateway::Authorizer",
       DependsOn: dependencies,
       Properties: {

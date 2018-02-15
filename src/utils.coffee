@@ -11,6 +11,7 @@ extractTags = (tags=[]) ->
 
 formatCF = (name) -> capitalize camelCase plainText name
 namePool = (name) -> "MixinUserPool#{formatCF name}"
+nameClient = (name) -> "MixinPool#{formatCF name}Client"
 
 # The user pool ARN is not part of the pool data structure.  Add if possible.
 _addPoolARN = ({whoAmI}, region) ->
@@ -22,13 +23,25 @@ _addPoolARN = ({whoAmI}, region) ->
     else
       false
 
+_addClientID = ({clientGetHead}) ->
+  (pool) ->
+    if pool
+      Object.defineProperties pool,
+        clientID:
+          enumerable: true
+          get: -> (await clientGetHead pool.Id, pool.Name).ClientId
+    else
+      false
+
 # Does the user pool exist?  Return it with its ARN if it does or return false.
 _exists = memoize (SDK) ->
-  {AWS:{Cognito:{poolGet}, STS}} = await Sundog SDK
+  {AWS:{Cognito, STS}} = await Sundog SDK
   addPoolARN = await _addPoolARN STS, SDK.config.region
+  addClientID = _addClientID Cognito
+  {poolGetHead} = Cognito
   memoize (name) ->
     try
-      addPoolARN await poolGet name
+      await addClientID addPoolARN await poolGetHead name
     catch e
       warningMsg e
       throw e
@@ -39,4 +52,5 @@ export {
   extractTags
   formatCF
   namePool
+  nameClient
 }
