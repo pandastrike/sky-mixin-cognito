@@ -19,26 +19,30 @@ buildPool = function (name, tags) {
       Properties: {
         UserPoolName: name,
         AdminCreateUserConfig: {
-          AllowAdminCreateUserOnly: true
+          AllowAdminCreateUserOnly: false
         },
         AutoVerifiedAttributes: ["email", "phone_number"],
+        AliasAttributes: ["email", "phone_number"],
         DeviceConfiguration: {
           ChallengeRequiredOnNewDevice: true,
           DeviceOnlyRememberedOnUserPrompt: false
         },
         MfaConfiguration: "ON",
+        Policies: {
+          PasswordPolicy: {
+            MinimumLength: 10,
+            RequireLowercase: false,
+            RequireNumbers: false,
+            RequireSymbols: false,
+            RequireUppercase: false
+          }
+        },
         Schema: [{
-          Name: "email",
           AttributeDataType: "String",
           DeveloperOnlyAttribute: false,
           Mutable: true,
-          Required: true
-        }, {
-          Name: "phone_number",
-          AttributeDataType: "String",
-          DeveloperOnlyAttribute: false,
-          Mutable: true,
-          Required: true
+          Name: "password",
+          Required: false
         }],
         SmsConfiguration: {
           ExternalId: `${formattedName}-external-id`,
@@ -46,6 +50,10 @@ buildPool = function (name, tags) {
             "Fn::GetAtt": [`MixinPool${formattedName}SNSRole`, "Arn"]
           }
         },
+        SmsAuthenticationMessage: "Your verification code is {####}",
+        SmsVerificationMessage: "Your verification code is {####}",
+        EmailVerificationSubject: "Verficiation Code",
+        EmailVerificationMessage: "Your verification code is {####}",
         UserPoolTags: (0, _utils.extractTags)(tags)
       }
     }

@@ -17,7 +17,7 @@ buildClient = function (name) {
       DeletionPolicy: "Retain",
       Properties: {
         ClientName: name,
-        ExplicitAuthFlows: ["ADMIN_NO_SRP_AUTH"],
+        ExplicitAuthFlows: ["USER_PASSWORD_AUTH"],
         GenerateSecret: false,
         UserPoolId: {
           Ref: `${(0, _utils.namePool)(name)}`

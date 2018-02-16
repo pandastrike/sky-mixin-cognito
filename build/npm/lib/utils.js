@@ -64,7 +64,7 @@ _addPoolARN = (() => {
   };
 })();
 
-_addClientID = function ({ clientGetHead }) {
+_addClientID = function ({ clientHead }) {
   return function (pool) {
     if (pool) {
       return Object.defineProperties(pool, {
@@ -72,7 +72,7 @@ _addClientID = function ({ clientGetHead }) {
           enumerable: true,
           get: (() => {
             var _ref2 = _asyncToGenerator(function* () {
-              return (yield clientGetHead(pool.Id, pool.Name)).ClientId;
+              return (yield clientHead(pool.Id, pool.Name)).ClientId;
             });
 
             return function get() {
@@ -90,18 +90,18 @@ _addClientID = function ({ clientGetHead }) {
 // Does the user pool exist?  Return it with its ARN if it does or return false.
 exports._exists = _exists = (0, _fairmont.memoize)((() => {
   var _ref3 = _asyncToGenerator(function* (SDK) {
-    var Cognito, STS, addClientID, addPoolARN, poolGetHead;
+    var Cognito, STS, addClientID, addPoolARN, poolHead;
     ({
       AWS: { Cognito, STS }
     } = yield (0, _sundog2.default)(SDK));
     addPoolARN = yield _addPoolARN(STS, SDK.config.region);
     addClientID = _addClientID(Cognito);
-    ({ poolGetHead } = Cognito);
+    ({ poolHead } = Cognito);
     return (0, _fairmont.memoize)((() => {
       var _ref4 = _asyncToGenerator(function* (name) {
         var e;
         try {
-          return yield addClientID(addPoolARN((yield poolGetHead(name))));
+          return yield addClientID(addPoolARN((yield poolHead(name))));
         } catch (error) {
           e = error;
           (0, _warningMessages2.default)(e);

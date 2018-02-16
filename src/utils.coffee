@@ -23,13 +23,13 @@ _addPoolARN = ({whoAmI}, region) ->
     else
       false
 
-_addClientID = ({clientGetHead}) ->
+_addClientID = ({clientHead}) ->
   (pool) ->
     if pool
       Object.defineProperties pool,
         clientID:
           enumerable: true
-          get: -> (await clientGetHead pool.Id, pool.Name).ClientId
+          get: -> (await clientHead pool.Id, pool.Name).ClientId
     else
       false
 
@@ -38,10 +38,10 @@ _exists = memoize (SDK) ->
   {AWS:{Cognito, STS}} = await Sundog SDK
   addPoolARN = await _addPoolARN STS, SDK.config.region
   addClientID = _addClientID Cognito
-  {poolGetHead} = Cognito
+  {poolHead} = Cognito
   memoize (name) ->
     try
-      await addClientID addPoolARN await poolGetHead name
+      await addClientID addPoolARN await poolHead name
     catch e
       warningMsg e
       throw e
